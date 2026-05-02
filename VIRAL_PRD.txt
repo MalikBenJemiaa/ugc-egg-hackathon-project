@@ -1,0 +1,284 @@
+egg Product Requirements Document 
+Connect Brands with UGC Creators
+
+Platform: Web 
+Audience: Project Owners, Marketing Agencies, UGC Creators 
+
+
+1. Project Overview 
+1.1 Concept 
+egg is a Tunisian platform that connects project owners and marketing agencies with UGC (User-Generated Content) creators. Instead of a traditional product shop, this is a talent/service marketplace — clients browse, filter, and hire content creators who produce authentic content for their brands. The platform launches in Tunisia and uses the Tunisian Dinar (DT) as its base currency. 
+1.2 Key Value Proposition 
+• Brands discover and hire vetted UGC creators quickly and securely 
+• Creators gain visibility and paid opportunities based on their performance and activity on the platform 
+• A coin-based economy (1 DT = 10 Coins) ensures fair, trackable transactions entirely within the app 
+• Ratings, reviews, and verification build trust between all parties 
+
+1.3 Target Users 
+User Type 		Who They Are 						What They Need 
+Client / Buyer 		Project owners, marketing agencies, brand managers 	Find and hire creators for content campaigns 
+Creator / Seller 	UGC creators, influencers, content producers 		Get discovered, get hired, get paid in real money 
+Admin / Support 	Platform operators and support team 			Verify profiles, manage reviews, handle disputes, monitor transactions 
+
+
+
+2. Coin Economy System 
+The platform uses an internal virtual currency called Coins. All transactions happen in coins inside the app. Real Tunisian Dinar (DT) is converted to coins on entry, and creators can withdraw their earned coins as real DT on demand. 
+
+2.1 Exchange Rate 
+Fixed Exchange Rate 1 DT (Tunisian Dinar) = 10 Coins. This rate applies to both purchases by clients and withdrawals by creators.
+
+2.2 Client Coin Wallet 
+• Clients buy coins by topping up their wallet with real DT 
+• Coins are deducted automatically for: profile visits, premium section access, and creator payments 
+• Wallet balance always visible in the app header/nav bar 
+• Low balance notification sent when coins drop below a threshold 
+• Each time a client visits creator profile, 1 coin is deducted from the client's wallet
+
+Package Name 	Price (DT) 	Coins Received 		Bonus Coins
+Starter 	5 DT 		50 Coins 		None 
+Basic 		10 DT 		110 Coins 		+10 bonus 
+Pro 		25 DT 		290 Coins 		+40 bonus
+Agency 		50 DT 		620 Coins 		+120 bonus
+
+Note: Coin packages and bonus amounts can be adjusted at any time by the Admin. 										
+										
+										
+2.3 Creator Coin Wallet 
+• Creators also have a coin wallet — they must maintain a coin balance to remain visible on the platform 
+• Creators top up their wallet with real DT (same 1 DT = 10 Coins rate) 
+• If the creator's wallet reaches 0 coins, their profile is automatically hidden from search and the discovery feed 
+• When a creator completes an order and receives coins from a client, those coins are added to their wallet balance 
+
+
+
+2.4 Creator Withdrawal (Versement) 
+Creators can request a withdrawal of their coin balance at any time, converting coins back to real DT. 
+Platform Commission 
+When a creator requests a withdrawal, the platform deducts 10% of the total amount as a service commission. The creator receives 90% of their coin balance in DT. 
+Example calculation displayed on the creator's wallet screen: 
+
+Field 				Example Value 
+Coin Balance 			500 Coins 
+Gross Value (in DT) 		50 DT (at 1 DT = 10 coins) 
+Platform Commission (10%) 	- 5 DT 
+Net Payout (real DT received) 	45 DT 
+
+
+• The creator sees both figures clearly: Gross Amount and Net Amount After Commission 
+• Withdrawal is processed by the admin/support team and paid via bank transfer or mobile payment 
+• Withdrawal history is visible in the creator's account under 'My Earnings' 
+
+
+
+
+3.1 Client Flow 
+1. Client opens the app and sees a feed of creator profiles (contact details locked) 
+2. Client registers or logs in 
+3. Client purchases coins to load their wallet (pays in DT) 
+4. Client browses and filters creators using the filter panel 
+5. Client clicks a creator profile — if the creator is Available, 1 coin is deducted from the client's wallet for the visit (only on first visit per creator) 
+6. Client reads the full profile: bio, portfolio, stats, reviews, and prices 
+7. Client builds a custom order using the interactive price configurator 
+8. Client contacts the creator or phone number (visible on profile) 
+9. Client pays the creator using coins — coins transfer from client wallet to creator wallet 
+10. Client leaves a star rating and review after the project is completed 
+
+3. User Flows 
+3.2 Creator Flow 
+11. Creator registers and submits their profile for admin verification 
+12. Creator fills in: niche, bio, platforms, prices, portfolio videos/photos, availability 
+13. Admin verifies the profile — once approved, the creator appears in search 
+14. Creator tops up their coin wallet (must maintain a positive balance to remain visible) 
+15. Creator is discovered by clients
+16. Creator receives messages and orders
+17. Creator toggles availability status (Available / Unavailable with a return date) 
+18. Creator completes work and delivers content to the client 
+19. Creator receives coins as payment — visible in their wallet 
+20. Creator requests a withdrawal — receives net DT after 10% platform commission 
+
+
+
+4. Application Screens & Features 
+4.1 Home / Discovery Feed 
+The main screen displayed when a user opens the app. Shows a scrollable grid or list of available creator profiles. 
+
+Before Login (Guest Mode) 
+• Show creator cards with name, photo, niche, and star rating 
+• Contact info, full details, and prices are hidden/blurred 
+• Lock icon visible on each card with CTA: 'Sign up to unlock profiles' 
+• Guest can browse but cannot visit profiles or contact creators 
+
+After Login 
+• Available creators are displayed first (Unavailable creators are hidden from the feed unless the client is already on their profile) 
+• Premium creators appear in a highlighted section at the top 
+
+
+
+4.2 Search & Filter System 
+A comprehensive filter panel allowing clients to narrow down exactly the creator they need. 
+
+Filter Category 		Options 
+Domain / Niche 			Restaurant, Food & Beverage, Fashion & Clothes, Coffee & Cafe, Sport & Fitness, Beauty & Skincare, Tech & Electronics, Travel, Home Decor, Health & Wellness, Automotive, 				 Pets, Other 
+Gender 				Man, Woman 
+Age Range 			18-24, 25-34, 35-44, 45+ (slider or preset ranges) 
+Platform 			Instagram, TikTok, YouTube, Instagram + TikTok, All Platforms 
+Language 			Arabic, French, English, Chinese, Spanish, German, Other 
+Location 			City or Region (within Tunisia) 
+Content Type 			Video UGC, Photo / Static Post, Story / Reel, Full Campaign Pack 
+Price Range 			Coin budget (min - max slider) 
+Star Rating 			Minimum rating (e.g., 4 stars and above) 
+Availability 			Available Now only (toggle to hide Unavailable creators) 
+Creator Tier 			Standard, Premium 
+
+
+4.3 Creator Profile Page 
+When a client clicks a creator card, the platform checks the creator's availability and the client's coin balance before allowing the visit. 
+
+Visit Logic 
+1 coin is deducted from the CLIENT's wallet on the FIRST visit to each unique creator profile. Repeat visits to the same profile are free.
+
+
+Profile Sections 
+• Profile photo and cover image 
+• Name, age, gender, city 
+• Niche / Domain tags (e.g., Restaurant, Fashion) 
+• Languages spoken 
+• Active platforms with clickable handles (Instagram, TikTok, YouTube) 
+• Bio / short personal description 
+• Portfolio: uploaded videos and photos of past UGC work 
+• Average views and engagement stats 
+• Overall star rating (calculated from all reviews) 
+• Client reviews: star score, text, and date 
+• Phone number (visible after coin unlock) 
+• Availability status badge 
+
+Availability Status Display 
+Creator Status 				What the Client Sees on Profile 
+Available 				Green badge: 'Available' — client can contact and order 
+Unavailable (with return date) 		Orange badge: 'Unavailable until [Date]' — client cannot order but can browse the profile 
+Unavailable (no date set) 		Orange badge: 'Currently Unavailable' — no return date displayed 
+
+
+4.4 Price Configurator (Interactive Order Builder) 
+
+A simple tick-box widget on the creator's profile where clients build their custom order. Price updates in real time as options are selected. 
+
+Service Option 					Description 						Pricing 
+UGC Video (no posting) 				Creator films and delivers the raw video file 		Base price (set by creator) 
++ Post on Instagram 				Creator posts the content on their Instagram feed 	+ add-on (set by creator) 
++ Post on TikTok 				Creator posts the content on their TikTok 		+ add-on (set by creator)
++ Instagram Story 				Creator adds a Story mentioning the brand 		+ add-on (set by creator) 
++ Campaign Pack 				Full bundle: video + all platform posts combined 	Bundle price (set by creator) 
+
+
+• Final total displayed in Coins and in DT equivalent (e.g., '150 Coins = 15 DT') 
+• 'Add to Order' button sends the selected configuration to the creator. 
+
+ 
+4.5 Creator Availability Toggle 
+The creator has a dedicated toggle in their dashboard to manage their availability status. 
+• Toggle options: Available or Unavailable 
+• When setting to Unavailable, the creator can optionally enter a return date (e.g., 'Back on 15 August 2025') 
+• When Unavailable: the creator's profile is hidden from the discovery feed and search results 
+• When Unavailable: the creator's wallet is NOT charged coins since no new visits occur 
+• The creator's profile remains accessible to clients who had previously visited it 
+• When the return date is reached, the creator receives a notification to reactivate their profile 
+• The creator can manually switch back to Available at any time before the return date 
+
+
+4.7 Review & Rating System 
+• After a completed order, the client can leave a review: star rating (1-5) and written comment 
+• Overall star rating on the profile is the calculated average of all reviews 
+• Reviews are permanent — neither the client nor the creator can delete them 
+• To remove a review, a support request must be submitted to the admin team 
+• Admins review each request individually — a review is only deleted if it is confirmed to be fake, abusive, or violating platform rules 
+• Reviews are sorted by most recent by default 
+
+
+5. Admin & Support Team The admin and support team manage the platform integrity, verify creators, handle disputes, and oversee the financial flow. 
+
+5.1 Creator Profile Verification Before a creator appears on the platform, their profile must be verified by the admin/support team. 
+• Creator submits their profile with: photo, bio, platforms (with links), niche, prices, and portfolio 
+• Admin reviews the submission and checks: real social media accounts, content quality, prices set correctly, no inappropriate content 
+• Admin can: Approve (profile goes live), Request Changes (send feedback to creator), or Reject (profile blocked) 
+• Creator receives a notification with the result of the verification 
+• Any major profile update (new prices, new portfolio) may trigger a re-verification step 
+
+5.2 Review Management 
+• Admin receives review removal requests from clients or creators 
+• Admin investigates the request — checks if the review is fake, fabricated, or abusive 
+• Admin can permanently delete a review if justified 
+• Both parties are notified of the outcome 
+• Admin can see the full review history for any creator 
+
+5.3 Financial & Withdrawal Management 
+• Admin sees all coin purchase transactions (which client, amount, date) 
+• Admin receives creator withdrawal requests 
+• Admin confirms the net payout (after 10% commission) and processes the DT transfer 
+• Admin marks the withdrawal as 'Processed' — creator is notified 
+• Admin can see the full earnings and withdrawal history per creator 
+
+5.4 Other Admin Capabilities 
+• View and manage all user accounts (suspend, ban, reactivate) 
+• Manage coin packages: add, edit, or remove pricing tiers 
+• Promote or remove creators from the Premium tier 
+• Access platform analytics: active users, revenue, top creators, most visited profiles 
+• Handle support tickets and resolve disputes between clients and creators 
+
+
+
+
+9. Technical Requirements 
+
+9.1 Platforms 
+• Web: Responsive web version for desktop browsers  
+
+9.2 Authentication 
+• Email + password registration 
+• Social login: Google
+• Two user roles at registration: Client or Creator 
+
+9.3 Payment Integration 
+• Tunisian payment gateway (e.g., Konnect, Paymee, or equivalent) for DT coin purchases (just simulation for the moment, not real integration)
+
+9.4 Media Handling 
+• Creators upload portfolio videos (MP4) and images (JPG, PNG) to their profile 
+• Support for embedding Instagram and TikTok profile links 
+• Built-in video player on the creator profile page 
+
+9.5 Technologies
+. nextjs + bootstrap + scss(not css), mongodb(use mongoatlas)
+. create .env file for secure links and passwords
+. creative design
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

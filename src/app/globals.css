@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f0e8da;
+  --foreground: #1c1917;
+  --primary: #f59e0b;
+  --primary-muted: #fde68a;
+  --secondary: #ebe4d6;
+  --surface: #fffcf7;
+  --surface-elevated: #ffffff;
+  --border-subtle: rgba(28, 25, 23, 0.08);
+  --border-strong: rgba(28, 25, 23, 0.12);
+  --accent-warm: #ea580c;
+  --muted: #78716c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-muted: var(--primary-muted);
+  --color-secondary: var(--secondary);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border-subtle: var(--border-subtle);
+  --color-muted: var(--muted);
+  --color-accent-warm: var(--accent-warm);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -40%, rgba(245, 158, 11, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%, rgba(234, 88, 12, 0.06), transparent 45%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus ring aligned with brand */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
