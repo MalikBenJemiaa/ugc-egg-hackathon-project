@@ -5,6 +5,7 @@ import { requireAuth, requireRole } from "@/lib/require-auth";
 import { ApiError, toErrorResponse } from "@/lib/api-errors";
 import { CreatorProfile } from "@/models/CreatorProfile";
 import { Order } from "@/models/Order";
+import { Review } from "@/models/Review";
 import { User } from "@/models/User";
 import { Wallet } from "@/models/Wallet";
 
@@ -137,6 +138,23 @@ export async function GET(req: Request) {
         },
       },
       { $unwind: { path: "$clientAccount", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: Review.collection.name,
+          let: { orderId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$orderId", "$$orderId"] },
+                status: "active",
+              },
+            },
+            { $limit: 1 },
+          ],
+          as: "review",
+        },
+      },
+      { $unwind: { path: "$review", preserveNullAndEmptyArrays: true } },
     ]);
 
     return Response.json({
@@ -174,6 +192,21 @@ export async function GET(req: Request) {
           trimOrNull(clientAccount?.name) ??
           emailLocalPart(clientAccount?.email ?? null);
 
+        const reviewDoc = (o.review ?? null) as {
+          _id?: { toString(): string };
+          stars?: number;
+          text?: string;
+          createdAt?: Date | string;
+        } | null;
+        const review = reviewDoc
+          ? {
+              id: reviewDoc._id ? reviewDoc._id.toString() : null,
+              stars: typeof reviewDoc.stars === "number" ? reviewDoc.stars : 0,
+              text: typeof reviewDoc.text === "string" ? reviewDoc.text : "",
+              createdAt: reviewDoc.createdAt ?? null,
+            }
+          : null;
+
         return {
           id: (o._id as { toString(): string }).toString(),
           clientUserId: (o.clientUserId as { toString(): string }).toString(),
@@ -192,6 +225,7 @@ export async function GET(req: Request) {
             name: clientName,
             image: trimOrNull(clientAccount?.image),
           },
+          review,
         };
       }),
     });

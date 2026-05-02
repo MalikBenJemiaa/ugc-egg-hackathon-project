@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreatorWalletCheckout } from "@/components/CreatorWalletCheckout";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -567,26 +567,82 @@ const STATUS_STYLES: Record<string, string> = {
 
 function OrdersTab({ token }: { token: string | null }) {
   const [orders, setOrders] = useState<OrderRow[] | null>(null);
+  const [reviewsByOrder, setReviewsByOrder] = useState<Record<string, ReviewRow>>({});
   const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [actionErr, setActionErr] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!token) return;
+    try {
+      const [oRes, rRes] = await Promise.all([
+        fetch("/api/orders", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/me/reviews", { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      const oData = (await oRes.json()) as OrdersResponse;
+      const rData = (await rRes.json()) as ReviewsResponse;
+      if (oData.ok) setOrders(oData.orders);
+      else setError(oData.message ?? "Failed to load orders.");
+      if (rData.ok) {
+        const map: Record<string, ReviewRow> = {};
+        for (const r of rData.reviews) map[r.orderId] = r;
+        setReviewsByOrder(map);
+      }
+    } catch {
+      setError("Failed to load orders.");
+    }
+  }, [token]);
 
   useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  async function markCompleted(orderId: string) {
     if (!token) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/orders", { headers: { Authorization: `Bearer ${token}` } });
-        const data = (await res.json()) as OrdersResponse;
-        if (cancelled) return;
-        if (data.ok) setOrders(data.orders);
-        else setError(data.message ?? "Failed to load orders.");
-      } catch {
-        if (!cancelled) setError("Failed to load orders.");
+    setActionErr(null);
+    setActionMsg(null);
+    setBusyId(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ status: "COMPLETED" }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.ok) {
+        setActionErr(json?.message ?? "Could not mark as completed.");
+        return;
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [token]);
+      setActionMsg("Order marked as completed. You can now rate the creator.");
+      await refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function submitReview(orderId: string, stars: number, text: string) {
+    if (!token) return;
+    setActionErr(null);
+    setActionMsg(null);
+    setBusyId(orderId);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ orderId, stars, text }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.ok) {
+        setActionErr(json?.message ?? "Could not submit review.");
+        return;
+      }
+      setActionMsg("Review submitted. Thanks for your feedback!");
+      await refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   if (error) {
     return (
@@ -624,12 +680,26 @@ function OrdersTab({ token }: { token: string | null }) {
   return (
     <div className="space-y-4">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">Orders history</h2>
+
+      {actionMsg ? (
+        <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-900">
+          {actionMsg}
+        </div>
+      ) : null}
+      {actionErr ? (
+        <div className="rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-800">
+          {actionErr}
+        </div>
+      ) : null}
+
       <ul className="space-y-3">
         {orders.map((o) => {
           const statusClass = STATUS_STYLES[o.status] ?? "bg-stone-200 text-stone-800 border-stone-300";
           const creatorId = o.creator?.id ?? o.creatorUserId;
           const creatorName = o.creator?.name ?? "Creator";
           const creatorImage = o.creator?.image ?? null;
+          const existingReview = reviewsByOrder[o.id];
+          const busy = busyId === o.id;
           return (
             <li
               key={o.id}
@@ -680,11 +750,111 @@ function OrdersTab({ token }: { token: string | null }) {
                   {o.totalCoins} coins · {coinsToDt(o.totalCoins)} DT
                 </span>
               </div>
+
+              {o.status === "DELIVERED" ? (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-3 text-sm">
+                  <p className="text-emerald-900">
+                    The creator marked this delivered. Confirm to complete the order and unlock the review.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void markCompleted(o.id)}
+                    disabled={busy}
+                    className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-700 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-60"
+                  >
+                    {busy ? "Saving…" : "Mark as received"}
+                  </button>
+                </div>
+              ) : null}
+
+              {o.status === "COMPLETED" && existingReview ? (
+                <div className="mt-4 rounded-xl border border-stone-900/10 bg-secondary/30 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-stone-900">Your review</p>
+                    <p className="text-amber-600" aria-label={`${existingReview.stars} stars`}>
+                      {"★".repeat(existingReview.stars)}
+                      <span className="text-stone-300">{"★".repeat(5 - existingReview.stars)}</span>
+                    </p>
+                  </div>
+                  {existingReview.text ? (
+                    <blockquote className="mt-2 text-stone-700">
+                      &ldquo;{existingReview.text}&rdquo;
+                    </blockquote>
+                  ) : (
+                    <p className="mt-2 italic text-stone-500">No written feedback.</p>
+                  )}
+                </div>
+              ) : null}
+
+              {o.status === "COMPLETED" && !existingReview ? (
+                <ReviewForm
+                  busy={busy}
+                  onSubmit={(stars, text) => void submitReview(o.id, stars, text)}
+                />
+              ) : null}
             </li>
           );
         })}
       </ul>
     </div>
+  );
+}
+
+function ReviewForm({
+  busy,
+  onSubmit,
+}: {
+  busy: boolean;
+  onSubmit: (stars: number, text: string) => void;
+}) {
+  const [stars, setStars] = useState(5);
+  const [text, setText] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(stars, text.trim());
+      }}
+      className="mt-4 space-y-3 rounded-xl border border-primary/25 bg-primary-muted/30 p-3"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-stone-900">Rate your experience</p>
+        <div className="flex items-center gap-0.5" role="radiogroup" aria-label="Star rating">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={n === stars}
+              onClick={() => setStars(n)}
+              className={`text-2xl leading-none transition ${
+                n <= stars ? "text-amber-500" : "text-stone-300 hover:text-amber-300"
+              }`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Share what you liked or what could be better. (optional)"
+        rows={3}
+        maxLength={4000}
+        className="w-full resize-y rounded-xl border border-stone-900/12 bg-surface-elevated p-3 text-sm text-stone-900 outline-none transition focus:border-primary"
+      />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-stone-500">{text.length}/4000</p>
+        <button
+          type="submit"
+          disabled={busy}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-4 text-xs font-semibold text-stone-900 shadow-sm ring-1 ring-stone-900/10 transition hover:brightness-105 disabled:opacity-60"
+        >
+          {busy ? "Submitting…" : "Submit review"}
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -784,8 +954,9 @@ function CommentsTab() {
     <div className="rounded-2xl border border-dashed border-stone-900/15 bg-surface-elevated/60 p-10 text-center text-stone-600">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">Comments history</h2>
       <p className="mt-3 text-sm">
-        Public comments aren&apos;t enabled yet. Once they go live, every comment you leave on a creator
-        profile will show up here.
+        Standalone comments aren&apos;t available yet. For now, the written feedback you leave with a
+        review (in the <span className="font-medium">Orders history</span> tab once an order is completed)
+        appears in the <span className="font-medium">Reviews history</span> tab.
       </p>
     </div>
   );

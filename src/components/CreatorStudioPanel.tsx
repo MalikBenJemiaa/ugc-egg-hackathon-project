@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { coinsToDt, withdrawalNetDtFromCoins } from "@/lib/coins";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type WithdrawalItem = {
   id: string;
@@ -21,6 +22,17 @@ type OrderItem = {
   totalCoins: number;
   status: string;
   createdAt: string;
+  client?: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  review?: {
+    id: string | null;
+    stars: number;
+    text: string;
+    createdAt: string | null;
+  } | null;
 };
 
 export type CreatorStudioView = "wallet" | "availability" | "orders" | "withdrawals";
@@ -119,6 +131,9 @@ export function CreatorStudioPanel({ token, initialAvailabilityStatus, initialRe
     }
     setOrderMsg(`Order updated to ${status}.`);
     await Promise.all([refreshOrders(), refreshBalance()]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("wallet:refresh"));
+    }
   }
 
   return (
@@ -253,19 +268,29 @@ export function CreatorStudioPanel({ token, initialAvailabilityStatus, initialRe
           {orders.length ? (
             orders.map((o) => {
               const next = ORDER_NEXT_STATUS[o.status];
+              const clientName = o.client?.name ?? "Client";
+              const clientImage = o.client?.image ?? null;
               return (
                 <div
                   key={o.id}
                   className="rounded-2xl border border-stone-900/10 bg-secondary/30 p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-sm">
-                      <div className="font-semibold tabular-nums text-stone-900">
-                        {o.totalCoins} coins · {o.items.length} item{o.items.length === 1 ? "" : "s"}
-                      </div>
-                      <div className="text-xs text-stone-500">
-                        From client <span className="font-mono">{o.clientUserId.slice(-6)}</span> ·{" "}
-                        {new Date(o.createdAt).toLocaleString()}
+                    <div className="flex min-w-0 items-center gap-3">
+                      <UserAvatar
+                        name={clientName}
+                        image={clientImage}
+                        initialsTextClassName="text-xs"
+                        className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/25 to-accent-warm/20 ring-1 ring-stone-900/10"
+                      />
+                      <div className="min-w-0 text-sm">
+                        <div className="font-semibold tabular-nums text-stone-900">
+                          {o.totalCoins} coins · {o.items.length} item{o.items.length === 1 ? "" : "s"}
+                        </div>
+                        <div className="truncate text-xs text-stone-500">
+                          From <span className="font-medium capitalize text-stone-700">{clientName}</span> ·{" "}
+                          {new Date(o.createdAt).toLocaleString()}
+                        </div>
                       </div>
                     </div>
                     <span className="rounded-full border border-stone-900/10 bg-surface-elevated px-3 py-1 text-xs font-semibold text-stone-800">
@@ -291,6 +316,40 @@ export function CreatorStudioPanel({ token, initialAvailabilityStatus, initialRe
                         </button>
                       ) : null}
                     </div>
+                  ) : null}
+
+                  {o.status === "COMPLETED" && o.review ? (
+                    <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-amber-900">
+                          Client review
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-600" aria-label={`${o.review.stars} out of 5 stars`}>
+                            {"★".repeat(o.review.stars)}
+                            <span className="text-stone-300">{"★".repeat(5 - o.review.stars)}</span>
+                          </span>
+                          {o.review.createdAt ? (
+                            <span className="text-xs text-stone-500">
+                              {new Date(o.review.createdAt).toLocaleDateString()}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      {o.review.text ? (
+                        <blockquote className="mt-2 text-stone-800">
+                          &ldquo;{o.review.text}&rdquo;
+                        </blockquote>
+                      ) : (
+                        <p className="mt-2 italic text-stone-600">No written feedback.</p>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {o.status === "COMPLETED" && !o.review ? (
+                    <p className="mt-3 rounded-xl border border-dashed border-stone-900/15 bg-surface-elevated/60 px-3 py-2 text-xs text-stone-600">
+                      Waiting for {clientName} to leave a review.
+                    </p>
                   ) : null}
                 </div>
               );
@@ -355,6 +414,9 @@ export function CreatorStudioPanel({ token, initialAvailabilityStatus, initialRe
               setBalance(json.wallet.balanceCoins);
               setWithdrawals((prev) => [json.withdrawal, ...prev]);
               setMsg("Withdrawal requested. Finance will process it shortly.");
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("wallet:refresh"));
+              }
             }}
           >
             Request withdrawal
