@@ -48,8 +48,3 @@ next-env.d.ts
 *.swp
 *.swo
 
-# user-uploaded media (keep folder structure via .gitkeep)
-/public/uploads/*
-!/public/uploads/.gitkeep
-/public/uploads/*/*
-!/public/uploads/*/.gitkeep
